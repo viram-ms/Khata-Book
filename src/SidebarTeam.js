@@ -38,14 +38,28 @@ function SidebarTeam({user_id, id, team_name, team_id,addNewTeam, joinNewTeam}) 
     const classes = useStyles();
 
     useEffect(() => {
+        // if(id){
+        //     db.collection('Rooms').doc(id).collection('messages')
+        //     .orderBy('timestamp','desc')
+        //     .onSnapshot(snapshot => (
+        //         setLastMessage(snapshot.docs.map((doc) => (
+        //             doc.data())))
+        //     ))
+        // }
+        async function call(){
         if(id){
-            db.collection('Rooms').doc(id).collection('messages')
-            .orderBy('timestamp','desc')
-            .onSnapshot(snapshot => (
-                setLastMessage(snapshot.docs.map((doc) => (
-                    doc.data())))
-            ))
+            const citiesRef = db.collection('teamid').doc('D8MZDPfPhdeC3Gi65Cgg').collection('data');
+            const snapshot = await citiesRef.where('month', '==', 'october2020').get();
+            if (snapshot.empty) {
+            console.log('No matching documents.');
+            }  
+    
+            snapshot.forEach(doc => {
+            console.log(doc.id, '=>', doc.data());
+            });
         }
+    }
+    call();
     },[id])
 
     // const createChat = () => {

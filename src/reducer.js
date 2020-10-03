@@ -1,11 +1,13 @@
 export const initialState = {
     user: null,
-    id: null
+    id: null,
+    teams: null
 }
 
 export const actionTypes = {
     SET_USER: "SET_USER",
-    SET_USER_ID: "SET_USER_ID"
+    SET_USER_ID: "SET_USER_ID",
+    SET_TEAMS: "SET_TEAMS"
 }
 
 const reducer = (state,action) => {
@@ -20,6 +22,11 @@ const reducer = (state,action) => {
             return {
                 ...state,
                 id: action.id,
+            };
+        case actionTypes.SET_TEAMS:
+            return {
+                ...state,
+                teams: action.teams
             }
         default:
 

@@ -32,14 +32,21 @@ function Login(props) {
             }
             const queryReference = await users.where('email', '==', authorize.user.email).get();
             console.log(queryReference);
-            queryReference.forEach(doc => {
+            await queryReference.forEach(doc => {
                 console.log(doc.id, '=>', doc.data());
                 localStorage.setItem('token',doc.id);
                 dispatch({
                     type: actionTypes.SET_USER_ID,
                     id: doc.id
                 });
+                console.log(id);
+                users.doc(doc.id).collection('groups').get().then((groupResponse) => (
+                    groupResponse.forEach((snap) => (
+                        console.log(snap.id, snap.data())
+                    ))
+                ));
             });
+            
             console.log(localStorage.getItem('token'));
             Auth.login(() => {
                 props.history.push('/dashboard');
