@@ -9,52 +9,39 @@ import db from './firebase';
 import Auth from './Auth';
 
 function Login(props) {
-    console.log(props);
     const [{user,id}, dispatch] = useStateValue();
-    // const [customer, setCustomer] = useState('');
 
     const signIn = async () => {
-        console.log(this);
         const authorize = await auth.signInWithPopup(provider);
         dispatch({
             type: actionTypes.SET_USER,
             user: authorize.user
         });
-        console.log(authorize);
+        localStorage.setItem('email',authorize.user.email);
+        localStorage.setItem('user',JSON.stringify(authorize.user));
         try {
             const users = await db.collection('users');
             const queryRef = await users.where('email', '==', authorize.user.email).get();
             if(queryRef.empty){
-                console.log('empty');
                 users.add({
                     email: authorize.user.email
                 });
             }
             const queryReference = await users.where('email', '==', authorize.user.email).get();
-            console.log(queryReference);
             await queryReference.forEach(doc => {
-                console.log(doc.id, '=>', doc.data());
-                localStorage.setItem('token',doc.id);
                 dispatch({
                     type: actionTypes.SET_USER_ID,
                     id: doc.id
                 });
-                console.log(id);
-                users.doc(doc.id).collection('groups').get().then((groupResponse) => (
-                    groupResponse.forEach((snap) => (
-                        console.log(snap.id, snap.data())
-                    ))
-                ));
+                localStorage.setItem('token',doc.id);
             });
             
-            console.log(localStorage.getItem('token'));
             Auth.login(() => {
                 props.history.push('/dashboard');
               });
         } catch(Error){
             console.log(Error);
         }
-      
     }
 
     return (

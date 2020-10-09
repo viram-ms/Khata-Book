@@ -11,7 +11,6 @@ export const actionTypes = {
 }
 
 const reducer = (state,action) => {
-    console.log(action);
     switch(action.type) {
         case actionTypes.SET_USER:
             return {
@@ -26,7 +25,7 @@ const reducer = (state,action) => {
         case actionTypes.SET_TEAMS:
             return {
                 ...state,
-                teams: action.teams
+                teams: [state.teams,action.teams]
             }
         default:
 

@@ -1,19 +1,15 @@
 .InsertData {
+    padding: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw;
 }
 
 .InsertData > form > input {
     border-radius: 30px;
     padding: 10px;
-    border: none;
     outline-width:0 ;
     margin-top: 10px;
-    width: 40vw;
+    width: 100%;
     min-width: 300px;
 }
 
@@ -27,4 +23,25 @@
     margin-top: 20px;
     display: block;
     cursor: pointer;
+}
+
+.InsertDataDiv {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.InputDiv {
+    display: block;
+    margin-top: 20px;
+}
+
+.InputDiv > input, select {
+    border-radius: 30px;
+    padding: 10px;
+    outline-width:0 ;
+    margin-top: 10px;
+    margin-right: 10px;
+    width: 100%;
+    min-width: 325px;
 }

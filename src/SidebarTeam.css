@@ -22,3 +22,13 @@ a {
 .SidebarChat__info {
     margin-left: 15px;
 }
+
+.SidebarTeams {
+    padding: 0px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid #f6f6f6;
+}
+
+.EmptyList {
+    margin: 0 10px;
+}

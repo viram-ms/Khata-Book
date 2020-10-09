@@ -14,22 +14,28 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import db from './firebase';
 import SidebarTeam from './SidebarTeam';
-import {useStateValue} from './StateProvider';
+import {useParams} from 'react-router-dom';
 import {Avatar} from '@material-ui/core';
-
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import notify from './toaster';
+import {Link} from 'react-router-dom'
 
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    // display: 'flex',
     width:'100%',
-    maxWidth:360
+    flexGrow: 1,
+    maxWidth:360,
+    position: 'relative'
   },
   nested: {
     paddingLeft: theme.spacing(4),
   },
   appBar: {
+    background: '#dc3545',
     transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -64,8 +70,10 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.toolbar,
     justifyContent: 'flex-end',
   },
-  content: {
+  title: {
     flexGrow: 1,
+  },
+  content: {
     padding: theme.spacing(3),
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
@@ -87,39 +95,96 @@ export default function Sidebar() {
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
     const [teams, setTeams] = useState([]);
-    
+    const [openMenu, setOpenMenu] = useState(false);
+    const [openTopMenu, setOpenTopMenu] = useState(false);
+    const {roomId, teamId,teamName} = useParams();
+    const id = localStorage.getItem('token');
+    const email = localStorage.getItem('email');
+    const user = JSON.parse(localStorage.getItem('user'));
 
 
-    const [{user,id}, dispatch] = useStateValue();
+    useEffect(() => {
+        setOpen(false);
+    },[teamName]);
+
     useEffect(() => {
         async function Call(){
-            if(user){
+            if(email){
                 const citiesRef = db.collection('users');
-                const snapshot = await citiesRef.where('email', '==', user.email).get();
+                const snapshot = await citiesRef.where('email', '==', email).get();
                 if (snapshot.empty) {
                 console.log('No matching documents.');
                 }  else {
                 snapshot.forEach(doc => {
-                // console.log(doc.id, '=>', doc.data());
-                db.collection('users').doc(doc.id).collection('groups').onSnapshot(snapshot => (
+                db.collection('users').doc(doc.id).collection('groups').onSnapshot((snapshot) => {
                     setTeams(snapshot.docs.map(docss => (
                         {
                             id: docss.id,
                             data: docss.data(),
                         }
                     )))
-                ))
+                    });
                 });
             }
         }
         }
-        // return () => {
-        //     unsubscribe();
-        // }
         Call();
-      },[]);
+      },[id]);
   
-    //   console.log(user,id);
+    const createTeam =  () => {
+        let team_id = Math.random().toString(36).substring(2, 5) + Math.random().toString(36).substring(2, 5);
+        let team_name = prompt("enter team name");
+        setOpenTopMenu(false);
+        if(id && team_name){
+            db.collection('users').doc(id).collection('groups').add({
+                name: team_name.toUpperCase(),
+                id: team_id.toUpperCase()
+            });
+            db.collection('teamid').add({
+                id: team_id.toUpperCase(),
+                name: team_name.toUpperCase(),
+            }).then(function(docRef) {
+                db.collection('teamid').doc(docRef.id).collection('members').add({
+                    name: user.displayName,
+                }).then(function(res) {
+                    if(res.id){
+                        notify('Team Created Successfully','info');
+                    } else {
+                        notify('Team Not Created','error');
+                    }
+                })
+            });
+        } else {
+            notify('Error Occured', 'error');
+        }
+    }
+
+    const joinTeam = async () => {
+        let team_id = prompt("enter team id");
+        let team_name = prompt("enter team name");
+
+        const check =await db.collection('teamid').where('id','==',team_id).get();
+        if(check.empty){
+            alert('enter correct team id');
+        } else {
+            db.collection('users').doc(id).collection('groups').add({
+                name: team_name.toUpperCase(),
+                id: team_id.toUpperCase()
+            });
+            check.forEach((item) => {
+                db.collection('teamid').doc(item.id).collection('members').add({
+                    name: user.displayName
+                }).then(function(res) {
+                    if(res.id){
+                        notify('Team Joined Successfully','info');
+                    } else {
+                        notify('Error Occured','error');
+                    }
+                })
+            })
+            
+        }  
+    }
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -129,8 +194,18 @@ export default function Sidebar() {
         setOpen(false);
     };
 
+    const handleCloseMenu = () => {
+        setOpenMenu(!setOpen);
+    }
 
-    
+    const logout = () => {
+        localStorage.clear();
+        window.location.reload();
+    }
+
+    const handleOpenTopMenu = () => {
+        setOpenTopMenu(!openTopMenu);
+    }
 
     return (
         <div className={classes.root}>
@@ -151,9 +226,28 @@ export default function Sidebar() {
             >
                 <MenuIcon />
             </IconButton>
-            <Typography variant="h6" noWrap>
-                Khata Book
-            </Typography>
+                <Typography variant="h6" noWrap className={classes.title}>
+                    Khata Book
+                </Typography>
+            {true && (
+                <div>
+                <IconButton aria-label="account of current user" aria-controls="menu-appbar" aria-haspopup="true" onClick={handleOpenTopMenu} color="inherit">
+                    <MoreVertIcon />
+                </IconButton>
+                <Menu 
+                getContentAnchorEl={null} 
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "center" }} 
+                id="simple-menu" 
+                keepMounted 
+                open={openTopMenu} 
+                onClose={handleOpenTopMenu}>
+                    <MenuItem onClick={createTeam}>Create Team</MenuItem>
+                    <MenuItem onClick={joinTeam}>Join Team</MenuItem>
+                    <MenuItem onClick={logout}>Logout</MenuItem>
+                </Menu>
+                </div>
+            )}
             </Toolbar>
         </AppBar>
         <Drawer
@@ -166,28 +260,18 @@ export default function Sidebar() {
             }}
         >
             <div className={classes.drawerHeader}>
-                <Avatar src={user.photoURL} />
-            <h2>{user.displayName}</h2>
-            <IconButton onClick={handleDrawerClose}>
-                {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-            </IconButton>
+                <Avatar src={user?.photoURL} className="Avatar" />
+                <Link to={`/dashboard`}><h2 className={classes.userName}>{user?.displayName}</h2></Link>
+                <IconButton onClick={handleDrawerClose}>
+                    {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                </IconButton>
             </div>
             <Divider />
-            <List>
-            <div className="sidebar__chats">
-                    
-                </div>
-            </List>
-            <List
-        component="nav"
-        aria-labelledby="nested-list-subheader"
-        className={classes.root}
-        >
-            <SidebarTeam user_id={id} addNewTeam />
+            <List component="nav" aria-labelledby="nested-list-subheader" className={classes.root}>
                 {teams.map(team => (
                         <SidebarTeam user_id={id} key={team.id} id={team.id} team_id={team.data.id} team_name={team.data.name} />
                 ))}
-        </List>
+            </List>
         </Drawer>
         </div>
     );

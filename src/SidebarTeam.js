@@ -1,77 +1,42 @@
-import { Avatar } from '@material-ui/core';
 import React, {useState, useEffect} from 'react';
 import './SidebarTeam.css';
 import db from './firebase';
 import {Link} from 'react-router-dom'; 
-import { makeStyles, useTheme } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import {useStateValue} from './StateProvider';
-import StarBorder from '@material-ui/icons/StarBorder';
-import firebase from 'firebase';
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-      width: '100%',
-      maxWidth: 360,
-      backgroundColor: theme.palette.background.paper,
-    },
-    nested: {
-      paddingLeft: theme.spacing(4),
-    },
-  }));
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import AddIcon from '@material-ui/icons/Add';
 
 
 function SidebarTeam({user_id, id, team_name, team_id,addNewTeam, joinNewTeam}) {
-    // console.log(user_id,id);
-    const [{user},dispatch] = useStateValue();
-    const [lastmessage, setLastMessage] = useState('');
-    const [generatedcode,setGeneratedCode] = useState('');
-    const [code, setCode] = useState('');
-    const [openList, setOpenList] = React.useState(true);
-    const classes = useStyles();
-
+    const [{user, teams},dispatch] = useStateValue();
+    const [teamId, setTeamId] = useState([]);
+    const [openList, setOpenList] = React.useState(false);
     useEffect(() => {
-        // if(id){
-        //     db.collection('Rooms').doc(id).collection('messages')
-        //     .orderBy('timestamp','desc')
-        //     .onSnapshot(snapshot => (
-        //         setLastMessage(snapshot.docs.map((doc) => (
-        //             doc.data())))
-        //     ))
-        // }
         async function call(){
         if(id){
-            const citiesRef = db.collection('teamid').doc('D8MZDPfPhdeC3Gi65Cgg').collection('data');
-            const snapshot = await citiesRef.where('month', '==', 'october2020').get();
+            const citiesRef = db.collection('teamid');
+            const snapshot = await citiesRef.where('id', '==', team_id).get();
             if (snapshot.empty) {
             console.log('No matching documents.');
             }  
-    
-            snapshot.forEach(doc => {
-            console.log(doc.id, '=>', doc.data());
+            await snapshot.forEach(async(doc) => {
+                db.collection('teamid').doc(doc.id).collection('data').onSnapshot(snapshot => (
+                    setTeamId(snapshot.docs.map((doc) => ({id: doc.id, data: doc.data()})))
+                ))
             });
         }
     }
     call();
-    },[id])
+    },[id]);
 
-    // const createChat = () => {
-    //     const chatRoom = prompt("Please enter name for chat room");
-
-    //     if(chatRoom) {
-    //         db.collection('Rooms').add({
-    //             name: chatRoom,
-    //         });
-    //     }
-    // }
-
+  
     const createTeam =  () => {
         let team_id = Math.random().toString(36).substring(2, 5) + Math.random().toString(36).substring(2, 5);
         let team_name = prompt("enter team name");
@@ -98,7 +63,6 @@ function SidebarTeam({user_id, id, team_name, team_id,addNewTeam, joinNewTeam}) 
         if(check.empty){
             alert('enter correct team id');
         } else {
-            
             db.collection('users').doc(user_id).collection('groups').add({
                 name: team_name,
                 id: team_id
@@ -113,40 +77,45 @@ function SidebarTeam({user_id, id, team_name, team_id,addNewTeam, joinNewTeam}) 
         setOpenList(!openList);
     };
 
-    return !addNewTeam ? (
-        <div>
+    const createMonth = async () => {
+        if(id){
+            let time = prompt("Enter Month and year");
+            const citiesRef = db.collection('teamid');
+            const snapshot = await citiesRef.where('id', '==', team_id).get();
+            if (snapshot.empty) {
+                console.log('No matching documents.');
+            }  
+            snapshot.forEach((doc) => {
+                db.collection('teamid').doc(doc.id).collection('data').add({
+                    month: time
+                });
+            });
+        }
+    }
+
+    return (
+        <div className="SidebarTeams">
             <ListItem button onClick={handleClick}>
-                <ListItemIcon>
-                    <InboxIcon />
+            <ListItemText primary={team_name} secondary={team_id} />
+                <ListItemIcon >
+                    <AddIcon onClick={createMonth}/>
                 </ListItemIcon>
-                <ListItemText primary={team_name} secondary={team_id} />
                 {openList ? <ExpandLess /> : <ExpandMore />}
             </ListItem>
+            {teamId && teamId.map(item => (
             <Collapse in={openList} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
-                <ListItem button className={classes.nested}>
+                <ListItem button >
                     <ListItemIcon>
-                        <StarBorder />
+                        <FiberManualRecordIcon />
                     </ListItemIcon>
-                    <ListItemText primary="October" />
-                </ListItem>
-                <ListItem button className={classes.nested}>
-                    <ListItemIcon>
-                        <StarBorder />
-                    </ListItemIcon>
-                    <ListItemText primary="November" />
+                    <Link to={`/dashboard/${team_id}/${item.id}/${item.data.month}`}>
+                        <ListItemText primary={item.data.month} />
+                    </Link>
                 </ListItem>
                 </List>
-            </Collapse>
-        </div>
-    ):(
-        <div>
-            <div onClick={createTeam} className="SidebarChat">
-                    <h2>Create New Team</h2>
-            </div>
-            <div onClick={joinTeam} className="SidebarChat">
-                    <h2>Join New Team</h2>
-            </div>
+            </Collapse> ))}
+            {teamId.length === 0 && <Collapse in={openList} timeout="auto" unmountOnExit><p className="EmptyList">No Groups Formed</p> </Collapse>}
         </div>
     )
 }

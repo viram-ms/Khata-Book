@@ -7,10 +7,13 @@
     "@material-ui/icons": "^4.9.1",
     "cra-template": "1.0.3",
     "firebase": "^7.21.1",
+    "mui-datatables": "^3.5.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "3.4.3"
+    "react-scripts": "3.4.3",
+    "react-swipeable-views": "^0.13.9",
+    "react-toastify": "^6.0.9"
   },
   "scripts": {
     "start": "react-scripts start",

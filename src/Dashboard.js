@@ -1,12 +1,13 @@
 import React from 'react'
 import Sidebar from './Sidebar'
-import InsertData from './InsertData';
+import Details from './Details';
+import './Dashboard.css';
 
 function Dashboard() {
     return (
-        <div>
+        <div className="Dashboard">
             <Sidebar />
-            <InsertData />
+            <Details />
         </div>
     )
 }

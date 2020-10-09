@@ -1,10 +1,7 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import {useStateValue} from './StateProvider';
 
 const LoginRoute = ({ component:Component, render,  ...rest }) => {
-
-
     return (
         <Route
         {...rest}

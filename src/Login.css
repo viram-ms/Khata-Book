@@ -1,13 +1,13 @@
 .login {
     background-color: white;
-    height: 100vh;
+    height: 98vh;
     width: 100vw;
     display: grid;
     place-items: center;
 }
 
 .login__container {
-    padding: 100px;
+    padding: 30px;
     text-align: center;
     background-color: white;
     border-radius: 10px;
@@ -25,4 +25,8 @@
     text-transform: inherit;
     background-color: #dc3545;
     color: white;
+}
+
+.login__container > button:hover {
+    background-color: #dc3545;
 }

@@ -1,14 +1,19 @@
 .app {
   display: grid;
   place-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  height: 100%;
   background-color: #dadbd3;
 }
 
 .app__body{
   display: flex;
   background-color: #ededed;
-  height: 98vh;
-  width: 98vw;
+  min-height: 98vh;
+  min-width: 98vw;
+  height: 99%;
+  width: 98%;
   box-shadow: -1px 4px 20px -6px rgba(0,0,0,0.75);
+  align-items: flex-start;
+  justify-content: center;
 }

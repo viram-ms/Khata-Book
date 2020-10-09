@@ -1,0 +1,32 @@
+.GroupDiv {
+    display: block;
+}
+
+.ParentDiv {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.ChildDiv {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 10px;
+}
+
+.Teams { 
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0px;
+    align-items: center;
+}
+
+.Teams > a {
+    flex-grow: 1;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.avatar {
+    margin: 5px;
+}
